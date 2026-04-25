@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UGC Ad Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    button {
+      background: #38bdf8;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0ea5e9;
+    }
+
+    .output {
+      margin-top: 20px;
+      background: #020617;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .script {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #1e40af;
+      border-radius: 6px;
+    }
+
+    .copy-btn {
+      margin-top: 5px;
+      background: #22c55e;
+      color: white;
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    .tracker {
+      margin-top: 20px;
+      padding: 10px;
+      background: #334155;
+      border-radius: 8px;
+    }
+
+    .best {
+      border: 2px solid #22c55e;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🚀 UGC Ad Generator</h1>
+
+<div class="container">
+
+  <!-- Input Section -->
+  <input id="product" type="text" placeholder="Enter Product Name">
+  
+  <select id="platform">
+    <option>Instagram</option>
+    <option>TikTok</option>
+    <option>YouTube Shorts</option>
+  </select>
+
+  <select id="voice">
+    <option>Fun</option>
+    <option>Luxury</option>
+    <option>Minimal</option>
+    <option>Aggressive</option>
+  </select>
+
+  <button onclick="generateAds()">Generate Ads</button>
+
+  <!-- Output -->
+  <div id="output" class="output"></div>
+
+  <!-- Performance Tracker -->
+  <div class="tracker">
+    <h3>📊 Performance Tracker</h3>
+    <input id="views" type="number" placeholder="Views">
+    <input id="clicks" type="number" placeholder="Clicks">
+    <input id="conversions" type="number" placeholder="Conversions">
+    <button onclick="calculate()">Analyze</button>
+    <p id="result"></p>
+  </div>
+
+</div>
+
+<script>
+function generateAds() {
+  let product = document.getElementById("product").value;
+  let platform = document.getElementById("platform").value;
+  let voice = document.getElementById("voice").value;
+
+  if (!product) {
+    alert("Enter product name!");
+    return;
+  }
+
+  let hooks = [
+    "Stop scrolling! This changed everything...",
+    "I didn't believe this at first...",
+    "This is why everyone is switching to this..."
+  ];
+
+  let scriptsHTML = "";
+
+  hooks.forEach((hook, i) => {
+    let script = `
+      <b>Hook:</b> ${hook} <br>
+      <b>Story:</b> I tried ${product} and the results were insane! <br>
+      <b>CTA:</b> Get yours now before it's gone! <br>
+      <b>Platform:</b> ${platform} | <b>Style:</b> ${voice}
+    `;
+
+    scriptsHTML += `
+      <div class="script" id="script${i}">
+        ${script}
+        <button class="copy-btn" onclick="copyText(${i})">Copy</button>
+      </div>
+    `;
+  });
+
+  document.getElementById("output").innerHTML = scriptsHTML;
+}
+
+function copyText(i) {
+  let text = document.getElementById("script" + i).innerText;
+  navigator.clipboard.writeText(text);
+  alert("Copied!");
+}
+
+function calculate() {
+  let views = document.getElementById("views").value;
+  let clicks = document.getElementById("clicks").value;
+  let conversions = document.getElementById("conversions").value;
+
+  let ctr = ((clicks / views) * 100).toFixed(2);
+  let cr = ((conversions / clicks) * 100).toFixed(2);
+
+  document.getElementById("result").innerHTML =
+    `CTR: ${ctr}% <br> Conversion Rate: ${cr}%`;
+
+  if (cr > 10) {
+    document.getElementById("result").innerHTML += "<br>🔥 High Performing Ad!";
+  }
+}
+</script>
+
+</body>
+</html>
