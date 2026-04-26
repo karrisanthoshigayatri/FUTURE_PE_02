@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UGC Ad Generator</title>
+  <title>Content Calendar Planner</title>
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: Arial, sans-serif;
       background: #0f172a;
@@ -15,168 +17,573 @@
     h1 {
       text-align: center;
       color: #38bdf8;
+      margin-bottom: 20px;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 960px;
       margin: auto;
       background: #1e293b;
       padding: 20px;
       border-radius: 10px;
     }
 
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: none;
+    label {
+      display: block;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 4px;
     }
 
-    button {
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #0f172a;
+      color: white;
+      font-size: 14px;
+    }
+
+    textarea { resize: vertical; min-height: 70px; }
+
+    input::placeholder, textarea::placeholder { color: #475569; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .row3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    button.primary {
+      width: 100%;
+      padding: 11px;
+      margin-top: 14px;
+      border-radius: 6px;
+      border: none;
       background: #38bdf8;
       color: black;
       font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.primary:hover { background: #0ea5e9; }
+
+    /* Calendar Grid */
+    .calendar-wrap {
+      margin-top: 24px;
+      background: #020617;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .calendar-header h3 { color: #38bdf8; font-size: 16px; }
+
+    .nav-btns { display: flex; gap: 8px; }
+
+    .nav-btn {
+      background: #1e293b;
+      color: #38bdf8;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .nav-btn:hover { background: #334155; }
+
+    .day-labels {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .day-label {
+      text-align: center;
+      font-size: 11px;
+      color: #64748b;
+      padding: 4px 0;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-cell {
+      background: #1e293b;
+      border-radius: 6px;
+      min-height: 74px;
+      padding: 6px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.15s;
+      border: 1px solid transparent;
+    }
+
+    .cal-cell:hover { background: #263548; border-color: #38bdf8; }
+    .cal-cell.today { border-color: #38bdf8; }
+    .cal-cell.other-month { opacity: 0.35; }
+
+    .cell-date {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: bold;
+    }
+
+    .cal-cell.today .cell-date { color: #38bdf8; }
+
+    .post-chip {
+      margin-top: 3px;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 3px;
       cursor: pointer;
     }
 
-    button:hover {
-      background: #0ea5e9;
-    }
+    .chip-ig { background: #7c3aed; color: #e9d5ff; }
+    .chip-tt { background: #be185d; color: #fce7f3; }
+    .chip-yt { background: #b91c1c; color: #fee2e2; }
 
-    .output {
+    /* Post List */
+    .post-list {
       margin-top: 20px;
       background: #020617;
-      padding: 15px;
       border-radius: 8px;
+      padding: 16px;
     }
 
-    .script {
-      margin-bottom: 15px;
-      padding: 10px;
-      background: #1e40af;
+    .post-list h3 { color: #38bdf8; font-size: 15px; margin-bottom: 12px; }
+
+    .post-item {
+      background: #1e293b;
       border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: space-between;
     }
 
-    .copy-btn {
-      margin-top: 5px;
-      background: #22c55e;
-      color: white;
-      padding: 5px;
+    .post-item-left { display: flex; align-items: center; gap: 10px; }
+
+    .platform-badge {
+      font-size: 11px;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .post-title { font-size: 13px; color: #e2e8f0; }
+    .post-date-text { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+    .post-actions { display: flex; gap: 6px; }
+
+    .del-btn {
+      background: #7f1d1d;
+      color: #fca5a5;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
       cursor: pointer;
     }
+    .del-btn:hover { background: #991b1b; }
 
-    .tracker {
-      margin-top: 20px;
-      padding: 10px;
-      background: #334155;
-      border-radius: 8px;
+    .status-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: bold;
     }
 
-    .best {
-      border: 2px solid #22c55e;
+    .status-scheduled { background: #164e63; color: #67e8f9; }
+    .status-draft { background: #334155; color: #94a3b8; }
+    .status-posted { background: #14532d; color: #86efac; }
+
+    /* Stats strip */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: #020617;
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-num { font-size: 26px; font-weight: bold; color: #38bdf8; }
+    .stat-lbl { font-size: 11px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .empty-state {
+      text-align: center;
+      color: #475569;
+      font-size: 13px;
+      padding: 20px;
+    }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid #334155;
+      margin: 20px 0;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid #334155;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: #38bdf8;
+      color: black;
+      border-color: #38bdf8;
     }
   </style>
 </head>
 
 <body>
 
-<h1>🚀 UGC Ad Generator</h1>
+<h1>📅 Content Calendar Planner</h1>
 
 <div class="container">
 
-  <!-- Input Section -->
-  <input id="product" type="text" placeholder="Enter Product Name">
-  
-  <select id="platform">
-    <option>Instagram</option>
-    <option>TikTok</option>
-    <option>YouTube Shorts</option>
-  </select>
+  <!-- Stats Strip -->
+  <div class="stats-strip">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-lbl">Total Posts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-scheduled">0</div>
+      <div class="stat-lbl">Scheduled</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-draft">0</div>
+      <div class="stat-lbl">Drafts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-posted">0</div>
+      <div class="stat-lbl">Posted</div>
+    </div>
+  </div>
 
-  <select id="voice">
-    <option>Fun</option>
-    <option>Luxury</option>
-    <option>Minimal</option>
-    <option>Aggressive</option>
-  </select>
+  <hr class="section-divider">
 
-  <button onclick="generateAds()">Generate Ads</button>
+  <!-- Add Post Form -->
+  <h3 style="color:#38bdf8; font-size:15px; margin-bottom:6px;">➕ Schedule New Post</h3>
 
-  <!-- Output -->
-  <div id="output" class="output"></div>
+  <label>Post Title / Topic</label>
+  <input id="post-title" type="text" placeholder="e.g. Summer sale UGC hook video">
 
-  <!-- Performance Tracker -->
-  <div class="tracker">
-    <h3>📊 Performance Tracker</h3>
-    <input id="views" type="number" placeholder="Views">
-    <input id="clicks" type="number" placeholder="Clicks">
-    <input id="conversions" type="number" placeholder="Conversions">
-    <button onclick="calculate()">Analyze</button>
-    <p id="result"></p>
+  <label>Caption / Notes</label>
+  <textarea id="post-caption" placeholder="Write your caption or content notes here..."></textarea>
+
+  <div class="row">
+    <div>
+      <label>Platform</label>
+      <select id="post-platform">
+        <option value="Instagram">Instagram</option>
+        <option value="TikTok">TikTok</option>
+        <option value="YouTube Shorts">YouTube Shorts</option>
+      </select>
+    </div>
+    <div>
+      <label>Content Type</label>
+      <select id="post-type">
+        <option>Reel / Short</option>
+        <option>Static Image</option>
+        <option>Carousel</option>
+        <option>Story</option>
+        <option>Live</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label>Scheduled Date</label>
+      <input id="post-date" type="date">
+    </div>
+    <div>
+      <label>Time</label>
+      <input id="post-time" type="time" value="09:00">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label>Status</label>
+      <select id="post-status">
+        <option value="scheduled">Scheduled</option>
+        <option value="draft">Draft</option>
+        <option value="posted">Posted</option>
+      </select>
+    </div>
+    <div>
+      <label>Voice / Style</label>
+      <select id="post-voice">
+        <option>Fun</option>
+        <option>Luxury</option>
+        <option>Minimal</option>
+        <option>Aggressive</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="primary" onclick="addPost()">Add to Calendar</button>
+
+  <hr class="section-divider">
+
+  <!-- Calendar View -->
+  <div class="calendar-wrap">
+    <div class="calendar-header">
+      <h3 id="cal-month-label">Month Year</h3>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="changeMonth(-1)">◀ Prev</button>
+        <button class="nav-btn" onclick="changeMonth(1)">Next ▶</button>
+      </div>
+    </div>
+    <div class="day-labels">
+      <div class="day-label">Sun</div>
+      <div class="day-label">Mon</div>
+      <div class="day-label">Tue</div>
+      <div class="day-label">Wed</div>
+      <div class="day-label">Thu</div>
+      <div class="day-label">Fri</div>
+      <div class="day-label">Sat</div>
+    </div>
+    <div class="calendar-grid" id="cal-grid"></div>
+  </div>
+
+  <!-- Post List -->
+  <div class="post-list">
+    <h3>📋 All Scheduled Posts</h3>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterPosts('all', this)">All</button>
+      <button class="filter-btn" onclick="filterPosts('Instagram', this)">Instagram</button>
+      <button class="filter-btn" onclick="filterPosts('TikTok', this)">TikTok</button>
+      <button class="filter-btn" onclick="filterPosts('YouTube Shorts', this)">YouTube Shorts</button>
+      <button class="filter-btn" onclick="filterPosts('scheduled', this)">Scheduled</button>
+      <button class="filter-btn" onclick="filterPosts('draft', this)">Draft</button>
+      <button class="filter-btn" onclick="filterPosts('posted', this)">Posted</button>
+    </div>
+    <div id="post-list-wrap">
+      <div class="empty-state">No posts yet. Schedule your first post above!</div>
+    </div>
   </div>
 
 </div>
 
 <script>
-function generateAds() {
-  let product = document.getElementById("product").value;
-  let platform = document.getElementById("platform").value;
-  let voice = document.getElementById("voice").value;
+  let posts = [];
+  let currentFilter = 'all';
+  let calYear, calMonth;
 
-  if (!product) {
-    alert("Enter product name!");
-    return;
+  const today = new Date();
+  calYear = today.getFullYear();
+  calMonth = today.getMonth();
+
+  // Set today as default date
+  document.getElementById('post-date').valueAsDate = today;
+
+  function platformColor(p) {
+    if (p === 'Instagram') return 'chip-ig';
+    if (p === 'TikTok') return 'chip-tt';
+    return 'chip-yt';
   }
 
-  let hooks = [
-    "Stop scrolling! This changed everything...",
-    "I didn't believe this at first...",
-    "This is why everyone is switching to this..."
-  ];
-
-  let scriptsHTML = "";
-
-  hooks.forEach((hook, i) => {
-    let script = `
-      <b>Hook:</b> ${hook} <br>
-      <b>Story:</b> I tried ${product} and the results were insane! <br>
-      <b>CTA:</b> Get yours now before it's gone! <br>
-      <b>Platform:</b> ${platform} | <b>Style:</b> ${voice}
-    `;
-
-    scriptsHTML += `
-      <div class="script" id="script${i}">
-        ${script}
-        <button class="copy-btn" onclick="copyText(${i})">Copy</button>
-      </div>
-    `;
-  });
-
-  document.getElementById("output").innerHTML = scriptsHTML;
-}
-
-function copyText(i) {
-  let text = document.getElementById("script" + i).innerText;
-  navigator.clipboard.writeText(text);
-  alert("Copied!");
-}
-
-function calculate() {
-  let views = document.getElementById("views").value;
-  let clicks = document.getElementById("clicks").value;
-  let conversions = document.getElementById("conversions").value;
-
-  let ctr = ((clicks / views) * 100).toFixed(2);
-  let cr = ((conversions / clicks) * 100).toFixed(2);
-
-  document.getElementById("result").innerHTML =
-    `CTR: ${ctr}% <br> Conversion Rate: ${cr}%`;
-
-  if (cr > 10) {
-    document.getElementById("result").innerHTML += "<br>🔥 High Performing Ad!";
+  function platformBadgeStyle(p) {
+    if (p === 'Instagram') return 'background:#7c3aed;color:#e9d5ff;';
+    if (p === 'TikTok') return 'background:#be185d;color:#fce7f3;';
+    return 'background:#b91c1c;color:#fee2e2;';
   }
-}
+
+  function platformIcon(p) {
+    if (p === 'Instagram') return '📸';
+    if (p === 'TikTok') return '🎵';
+    return '▶';
+  }
+
+  function addPost() {
+    const title = document.getElementById('post-title').value.trim();
+    const caption = document.getElementById('post-caption').value.trim();
+    const platform = document.getElementById('post-platform').value;
+    const type = document.getElementById('post-type').value;
+    const date = document.getElementById('post-date').value;
+    const time = document.getElementById('post-time').value;
+    const status = document.getElementById('post-status').value;
+    const voice = document.getElementById('post-voice').value;
+
+    if (!title) { alert('Please enter a post title!'); return; }
+    if (!date) { alert('Please select a date!'); return; }
+
+    posts.push({ id: Date.now(), title, caption, platform, type, date, time, status, voice });
+
+    document.getElementById('post-title').value = '';
+    document.getElementById('post-caption').value = '';
+
+    renderCalendar();
+    renderList();
+    updateStats();
+  }
+
+  function deletePost(id) {
+    posts = posts.filter(p => p.id !== id);
+    renderCalendar();
+    renderList();
+    updateStats();
+  }
+
+  function updateStats() {
+    document.getElementById('stat-total').textContent = posts.length;
+    document.getElementById('stat-scheduled').textContent = posts.filter(p => p.status === 'scheduled').length;
+    document.getElementById('stat-draft').textContent = posts.filter(p => p.status === 'draft').length;
+    document.getElementById('stat-posted').textContent = posts.filter(p => p.status === 'posted').length;
+  }
+
+  function filterPosts(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderList();
+  }
+
+  function renderList() {
+    const wrap = document.getElementById('post-list-wrap');
+    let filtered = posts;
+    if (currentFilter !== 'all') {
+      filtered = posts.filter(p => p.platform === currentFilter || p.status === currentFilter);
+    }
+
+    if (filtered.length === 0) {
+      wrap.innerHTML = '<div class="empty-state">No posts match this filter.</div>';
+      return;
+    }
+
+    filtered.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+    wrap.innerHTML = filtered.map(p => {
+      const statusClass = `status-${p.status}`;
+      const dateStr = p.date ? new Date(p.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      return `
+        <div class="post-item">
+          <div class="post-item-left">
+            <span class="platform-badge" style="${platformBadgeStyle(p.platform)}">${platformIcon(p.platform)} ${p.platform}</span>
+            <div>
+              <div class="post-title">${p.title}</div>
+              <div class="post-date-text">${dateStr} at ${p.time} &nbsp;·&nbsp; ${p.type} &nbsp;·&nbsp; ${p.voice}</div>
+            </div>
+          </div>
+          <div class="post-actions">
+            <span class="status-badge ${statusClass}">${p.status}</span>
+            <button class="del-btn" onclick="deletePost(${p.id})">✕</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function changeMonth(dir) {
+    calMonth += dir;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  }
+
+  function renderCalendar() {
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('cal-month-label').textContent = `${monthNames[calMonth]} ${calYear}`;
+
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+
+    const todayStr = today.toISOString().split('T')[0];
+
+    // Prev month filler
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell other-month';
+      cell.innerHTML = `<div class="cell-date">${daysInPrev - i}</div>`;
+      grid.appendChild(cell);
+    }
+
+    // Current month days
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell' + (dateStr === todayStr ? ' today' : '');
+      cell.innerHTML = `<div class="cell-date">${d}</div>`;
+
+      const dayPosts = posts.filter(p => p.date === dateStr);
+      dayPosts.forEach(p => {
+        const chip = document.createElement('div');
+        chip.className = `post-chip ${platformColor(p.platform)}`;
+        chip.title = p.title;
+        chip.innerHTML = `${platformIcon(p.platform)} <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60px;">${p.title}</span>`;
+        cell.appendChild(chip);
+      });
+
+      grid.appendChild(cell);
+    }
+
+    // Next month filler
+    const totalCells = firstDay + daysInMonth;
+    const remainder = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let i = 1; i <= remainder; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell other-month';
+      cell.innerHTML = `<div class="cell-date">${i}</div>`;
+      grid.appendChild(cell);
+    }
+  }
+
+  renderCalendar();
 </script>
 
 </body>
